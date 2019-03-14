@@ -6,18 +6,22 @@ b_size = 400
 
 class Board:
     def __init__(self):
+        # graphics
         self.white = (255, 255, 255)
         self.blue = (0,190,250)
         self.red = (255,0,0)
         self.image = pygame.image.load('game_board.png')
         self.image = pygame.transform.scale(self.image, (b_size, b_size))
-        # sets up empty lists
+        # sets up empty lists of objects
         self.p = [[],[],[],[],[],[],[],[]] # pieces
         self.t = [[],[],[],[],[],[],[],[]] # testing
         self.s = [[],[],[],[],[],[],[],[]] # squares
+        # logic
         self.pressed = False
         self.m1 = -1
         self.m2 = -1
+        self.player = 0  # player 1 or 2
+
 
         for x in range(8):
             for y in range(8):
@@ -48,6 +52,7 @@ class Board:
             for col in range(8):
                 print(self.t[col][row], end=" ")
             print("")
+
     def drawPieces(self,win):
         for row in range(8):
             for col in range(8):
@@ -61,11 +66,44 @@ class Board:
                     self.p[col][row].draw(win, self.p[col][row].getColor())
                 # checks for mouse
                 self.checkMouse(win, self.p[col][row])
+                self.player = self.state(col, row)
+                print(self.player)
+
+    def state(self, col, row):
+        if self.p[col][row] is None:
+            return 0
+        elif (self.p[col][row].getColor() == self.red):
+            return 1
+        else:
+            return 2
+
+
 
     def drawBoard(self, win):
         win.blit(self.image, (100, 100))
 
-    def legalMoves(self, d):
+
+    def basicMoves(self, d, win):  # returns piece we have clicked
+        col = d.col
+        row = d.row
+        new_r = 0
+        new_c = 0
+
+        if self.p[col][row].state() == 1:
+            #left-up
+            new_r = row + 1; new_c = col + 1;
+            if new_r > -1 and new_c > -1:  # checks for edge
+                if self.p[new_c][new_r].state(new_c, new_r) == 0:
+                    self.s[new_c][new_r].draw(win)
+                elif self.g[new_c][new_r].state(new_c, new_r) == 2:
+
+
+
+
+
+
+
+
 
         pass  # takes in a square, gives other squares that the piece can move to
 
@@ -81,8 +119,9 @@ class Board:
                 d.highlight(win, (255, 255, 0))
             if d.down:
                 d.highlight(win, (0, 255, 0))
+                self.basicMoves(d)
 
-    def checkClick(self, win):
+    def checkClick(self):
         for row in range(8):
             for col in range(8):
                 if self.s[col][row].checkMouse():
@@ -95,6 +134,9 @@ class Board:
                         pass
                     else:
                         self.p[col][row].down = False
+
+    def drawMoves(self):
+        pass #  draws squares in move locations
 class Piece:
 
     def __init__(self, col, row, color):
@@ -105,6 +147,7 @@ class Piece:
         self.board_size = b_size/8
         self.offset = 116 + self.r / 2
         self.down = False
+        self.king = False
 
     def setCol(self, c):
         self.col = c
@@ -160,6 +203,7 @@ class Square:
         c = self.getY() < m[1] < self.getY() + self.dis
         if r and c:
             return True
+
 
 '''
 b = Board()

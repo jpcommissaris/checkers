@@ -1,12 +1,9 @@
 import pygame
-from checkers.board import Board
+from game_objects import Board
 
 pygame.init()
 
-# colors
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-RED = (255, 0, 0)
+
 
 # Set up the screen [width, height]
 length = 600
@@ -45,13 +42,13 @@ while not done:
         if event.type == pygame.QUIT:
             done = True
         if event.type == pygame.MOUSEBUTTONUP:
-            b.checkClick(screen)
+            b.checkClick()
 
     # --- scene logic ---
 
 
     # --- repaints screen ---
-    screen.fill(WHITE)
+    screen.fill((255,255,255))
 
     # --- new drawings ---
     b.drawBoard(screen)

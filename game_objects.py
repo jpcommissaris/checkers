@@ -1,5 +1,5 @@
 import pygame
-
+pygame.font.init()
 b_size = 400
 RED = (255, 0, 0)
 BLUE = (0, 190, 250)
@@ -13,12 +13,14 @@ class Board:
         self.s = [[],[],[],[],[],[],[],[]] # squares
         # logic
         self.pressed = False
-        self.turn = 2  # player 1 or 2
+        self.turn = 1  # player 1 or 2
+        self.p1 = 12 
+        self.p2 = 12
+        self.jumped = False
         # creates 64 square objects all with no pieces
         for x in range(8):
             for y in range(8):
                 self.s[x].insert(y, Square(x, y, None))
-
 
     def setBoard(self):
 
@@ -38,17 +40,29 @@ class Board:
             for col in range(8):
 
                 # puts pieces in right place
-                if self.s[col][row].state == 0:
+                if self.s[col][row].state == 0 :
                     pass
                 else:
                     self.s[col][row].piece.col = col
                     self.s[col][row].piece.row = row
                     self.s[col][row].piece.draw(win, self.s[col][row].piece.color)
+                    self.moves(win, self.s[col][row], col, row)
+
+
                 # checks for mouse
                 self.checkMouse(win, self.s[col][row])
 
     def drawBoard(self, win):
+        pygame.draw.rect(win, (230, 250, 230), (265, 530, 50, 25))
         win.blit(self.image, (100, 100))
+        myfont = pygame.font.SysFont('Arial', 20)
+        score1 = myfont.render(str(self.p1), False, (0, 0, 0))
+        win.blit(score1,(120, 76))
+        score2 = myfont.render(str(self.p2), False, (0, 0, 0))
+        win.blit(score2,(450, 76))
+        passButton = myfont.render("pass", False, (0, 0, 0))
+        win.blit(passButton, (270, 530))
+
 
     def checkMouse(self, win, d):
         if d.state == 0:
@@ -74,22 +88,149 @@ class Board:
                     if self.s[col][row].state != 0:
                         self.s[col][row].piece.down = False
 
+    def moves(self, win, sq, col, row):
+        p = sq.piece
+        b1 = False; b2 = False; b3 = False; b4 = False;
+        # checks for correct piece
+        if p.down:
+            # up
+            if self.turn == 1 or p.king:
+                b1=self.leftU(win, col, row) or self.rightU(win, col, row)
+            # down
+            if self.turn == 2 or p.king:
+                b3=self.leftD(win, col, row) or self.rightD(win, col, row)
+        self.jumped = b1 or b3
+
+
+    def leftU(self, win, col, row):
+        if row - 1 > -1 and col - 1 > -1:
+            # move
+            if (self.s[col - 1][row - 1].state == 0) and not self.jumped:
+                self.s[col - 1][row - 1].draw(win)
+                self.doMove(col-1,row-1,col,row)
+            # jump
+            elif self.s[col - 1][row - 1].state == self.turn:
+                pass
+            elif row - 2 > -1 and col - 2 > -1:
+                if self.s[col - 2][row - 2].state == 0 and self.s[col - 1][row - 1].state != 0:
+                    self.s[col - 2][row - 2].draw(win)
+                    self.doJump(win, col - 2, row - 2, col - 1, row - 1, col, row)
+                    return True
+        return False
+
+    def rightU(self, win, col, row):
+        if col + 1 < 8 and row - 1 > -1:
+            # move
+            if self.s[col + 1][row - 1].state == 0 and not self.jumped:
+                self.s[col + 1][row - 1].draw(win)
+                self.doMove(col + 1, row - 1, col, row)
+            # jump
+            elif self.s[col + 1][row - 1].state == self.turn:
+                pass
+            elif col + 2 < 8 and row - 2 > -1:
+                if self.s[col + 2][row - 2].state == 0 and self.s[col + 1][row - 1].state != 0:
+                    self.s[col + 2][row - 2].draw(win)
+                    self.doJump(win, col + 2, row - 2, col + 1, row - 1, col, row)
+                    return True
+        return False
+
+    def leftD(self, win, col, row):
+        if row + 1 < 8 and col - 1 > -1:
+            # move
+            if self.s[col - 1][row + 1].state == 0 and not self.jumped:
+                self.s[col - 1][row + 1].draw(win)
+                self.doMove(col-1, row+1, col, row)
+            # jump
+            elif self.s[col - 1][row + 1].state == self.turn:
+                pass
+            elif row + 2 < 8 and col - 2 > -1:
+                if self.s[col - 2][row + 2].state == 0 and self.s[col - 1][row + 1].state != 0:
+                    self.s[col - 2][row + 2].draw(win)
+                    self.doJump(win, col - 2, row + 2, col - 1, row + 1, col, row)
+                    return True
+        return False
+
+    def rightD(self, win, col, row):
+        if col + 1 < 8 and row + 1 < 8:
+            # move
+            if self.s[col + 1][row + 1].state == 0 and not self.jumped:
+                self.s[col + 1][row + 1].draw(win)
+                self.doMove(col + 1, row + 1, col, row)
+            # jump
+            elif self.s[col + 1][row + 1].state == self.turn:
+                pass
+            elif col + 2 < 8 and row + 2 < 8:
+                if self.s[col + 2][row + 2].state == 0 and self.s[col + 1][row + 1].state != 0:
+                    self.s[col + 2][row + 2].draw(win)
+                    self.doJump(win, col+2,row+2,col+1,row+1,col,row)
+                    return True
+        return False
+
+    def doMove(self, col, row, colP, rowP):
+        if self.pressed:
+            if self.s[col][row].checkMouse():
+                self.s[col][row].setState(self.turn)
+                # checks for king
+                if self.s[colP][rowP].piece.king or self.turn == 1 and row == 0 or self.turn == 2 and row == 7:
+                    self.s[col][row].piece.king = True
+                self.s[colP][rowP].setState(0)
+                self.doPass()
+
+    def doJump(self, win, col, row, colJ, rowJ, colP, rowP):
+        self.jumped = True
+        if self.pressed:
+            if self.s[col][row].checkMouse():
+                self.s[col][row].setState(self.turn)
+                # checks for king
+                if self.s[colP][rowP].piece.king or self.turn == 1 and row == 0 or self.turn == 2 and row == 7:
+                    self.s[col][row].piece.king = True
+                self.s[colP][rowP].setState(0)
+                self.s[colJ][rowJ].setState(0)
+                self.s[col][row].piece.down = True
+                #scroing
+                if self.turn == 1:
+                    self.p2 -= 1  # change to 1 later
+                else:
+                    self.p1 -= 1
+                self.moves(win, self.s[col][row], col, row)
+        if not self.jumped:
+            self.s[col][row].piece.down = False
+            self.doPass()
+    def doPass(self):
+        if self.turn == 1:
+            self.turn = 2  # change to 1 later
+        else:
+            self.turn = 1
+
+
+
+
 class Square:
     def __init__(self, c, r, piece):
         self.r = r
         self.c = c
         self.dis = 50
         # handle a piece object on square
-        if piece is None:
-            state = 0
-        elif piece.color == RED:
-            state = 1
+        self.piece = piece
+        self.state = 0
+        if self.piece is None:
+            l = 0
+        elif self.piece.color == RED:
+            l = 1
         else:
-            state = 2
-        self.state = state
-        self.piece = piece  # None, or a piece
+            l = 2
+        self.setState(l)
 
-    # --- getters ---
+    # --- getters and setters---
+    def setState(self, l):
+        self.state = l
+        if l == 0:
+            self.piece = None
+        elif l == 1:
+            self.piece = Piece(self.c, self.r, RED, False)
+        else:
+            self.piece = Piece(self.c, self.r, BLUE, False)
+
     def getX(self):
         return self.c * self.dis + 100
 
@@ -98,7 +239,7 @@ class Square:
 
     # --- graphics ---
     def draw(self, win):
-        pygame.draw.rect(win, (255, 0, 0), (self.getX(), self.getY(), self.dis, self.dis), 2)
+        pygame.draw.rect(win, (250, 20, 20), (self.getX(), self.getY(), self.dis, self.dis), 2)
 
     # --- logic ---
 
@@ -109,6 +250,8 @@ class Square:
         if r and c:
             return True
 
+    def moveLegal(self):
+        return True
 
 class Piece:
 
@@ -120,7 +263,10 @@ class Piece:
         self.board_size = b_size/8
         self.offset = 116 + self.r / 2
         self.down = False
+        #king piece
         self.king = king
+        self.image = pygame.image.load('crown.png')
+        self.image = pygame.transform.scale(self.image, (24, 24))
 
     # --- getters ---
     def getX(self):
@@ -136,13 +282,13 @@ class Piece:
         y = offset+self.row * self.board_size
         pygame.draw.circle(win, color, (int(x), int(y)), int(self.r))
         if self.king:
-            pass # blit image of crown
+            win.blit(self.image, (x-13, y-12))
 
     def highlight(self,win,color):
         offset = 116 + self.r/2
         x = offset+self.col * self.board_size
         y = offset+self.row * self.board_size
-        pygame.draw.circle(win, color, (int(x) - 1, int(y) - 1), int(self.r), 4)
+        pygame.draw.circle(win, color, (int(x) - 1, int(y) - 1), int(self.r), 3)
 
     # --- logic ---
 

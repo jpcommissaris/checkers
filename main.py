@@ -42,7 +42,16 @@ while not done:
         if event.type == pygame.QUIT:
             done = True
         if event.type == pygame.MOUSEBUTTONUP:
+            m = pygame.mouse.get_pos()
+            if 265 < m[0] < 315 and 530 < m[1] < 555:
+                b.doPass()
+            b.pressed = True
+            b.drawBoard(screen)
+            b.drawPieces(screen)
             b.checkClick()
+
+
+
 
     # --- scene logic ---
 

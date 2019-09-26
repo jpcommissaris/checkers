@@ -22,6 +22,11 @@ class Board:
             for y in range(8):
                 self.s[x].insert(y, Square(x, y, None))
 
+    def won(self):
+        if self.p1 == 0 or self.p2 == 0:
+            return True
+        return False
+
     def setBoard(self):
 
         for t in range(1, 8, 2):

@@ -1,4 +1,5 @@
 import pygame
+import time
 from game_objects import Board
 
 pygame.init()
@@ -17,17 +18,6 @@ done = False
 # Used to manage how fast the screen updates
 clock = pygame.time.Clock()
 
-scene=1
-
-def scene1():
-    global scene
-    scene = 2
-    b.setBoard()
-    pass
-
-def scene2():
-    global scene
-    pass
 
 b = Board()
 b.setBoard()
@@ -49,6 +39,10 @@ while not done:
             b.drawBoard(screen)
             b.drawPieces(screen)
             b.checkClick()
+
+    if b.won():
+        time.sleep(2)
+        b.setBoard()
 
 
 

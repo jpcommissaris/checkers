@@ -95,7 +95,8 @@ class Board:
 
     def moves(self, win, sq, col, row):
         p = sq.piece
-        b1 = False; b2 = False; b3 = False; b4 = False;
+        b1 = False
+        b3 = False
         # checks for correct piece
         if p.down:
             # up
@@ -176,7 +177,7 @@ class Board:
             if self.s[col][row].checkMouse():
                 self.s[col][row].setState(self.turn)
                 # checks for king
-                if self.s[colP][rowP].piece.king or self.turn == 1 and row == 0 or self.turn == 2 and row == 7:
+                if self.s[colP][rowP].piece.king or (self.turn == 1 and row == 0) or (self.turn == 2 and row == 7):
                     self.s[col][row].piece.king = True
                 self.s[colP][rowP].setState(0)
                 self.doPass()
